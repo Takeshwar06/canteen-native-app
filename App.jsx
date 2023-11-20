@@ -2,7 +2,8 @@ import { View, Text } from 'react-native'
 import React from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import Icon from 'react-native-vector-icons/Entypo';
+// import Icon from 'react-native-vector-icons/MaterialIcons';
+import Icon from 'react-native-vector-icons/Ionicons';
 import Home from './screens/Home';
 import Message from './screens/Message';
 import AddCard from './screens/AddCard';
@@ -10,6 +11,7 @@ import Coin from './screens/Coin'
 
 const Tab = createBottomTabNavigator();
 export default function App() {
+  console.log("tiger jintjtjtjtjda hai")
   return (
     <NavigationContainer>
       <Tab.Navigator 
@@ -24,7 +26,7 @@ export default function App() {
           tabBarLabelStyle:{color:"#008E97"},
           tabBarIcon:({focused})=>
           focused ? (
-            <Icon name="home" size={30} color="orange" />
+            <Icon name="logo-instagram" size={30} color="orange" />
           ):(
             <Icon name="home" size={30} color="#000" />
           )
@@ -39,7 +41,7 @@ export default function App() {
           tabBarLabelStyle:{color:"#008E97"},
           tabBarIcon:({focused})=>
           focused ? (
-            <Icon name="message" size={30} color="#000" />
+            <Icon name="currency_rupee" size={30} color="#000" />
           ):
           (
             <Icon name="message" size={30} color="#000" />
@@ -55,10 +57,10 @@ export default function App() {
           tabBarLabelStyle:{color:"#008E97"},
           tabBarIcon:({focused})=>
           focused ? (
-            <Icon name="coin-dollar" size={30} color="#000" />
+            <Icon name="mail" size={30} color="#000" />
           ):
           (
-            <Icon name="coin-dollar" size={30} color="#000" />
+            <Icon name="currency_rupee" size={30} color="#000" />
           )
         }}
         />

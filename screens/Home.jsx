@@ -1,16 +1,104 @@
 import { View, TextInput, Image, Pressable, Text, ScrollView, TouchableOpacity } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Icon from 'react-native-vector-icons/Entypo';
 import { SliderBox } from 'react-native-image-slider-box'
 import HomeItem from '../components/HomeItem';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { EmployeeId, getAllFoodsRoute } from '../utils/APIRoutes';
+import axios from 'axios';
+
 export default function Home() {
+  const [foods,setFoods]=useState([])
   const data = ["tiger", "tiger janghle", "tiger", "tiger", "tiger"]
   const images = [
     "https://www.verywellhealth.com/thmb/f1Ilvp8yoFZEKP_B_YBK8HO1irE=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/gastritis-diet-what-to-eat-for-better-management-4767967-primary-recirc-fc776855e98b43b9832a6fd313097d4f.jpg",
     "https://www.verywellhealth.com/thmb/f1Ilvp8yoFZEKP_B_YBK8HO1irE=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/gastritis-diet-what-to-eat-for-better-management-4767967-primary-recirc-fc776855e98b43b9832a6fd313097d4f.jpg",
     "https://www.verywellhealth.com/thmb/f1Ilvp8yoFZEKP_B_YBK8HO1irE=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/gastritis-diet-what-to-eat-for-better-management-4767967-primary-recirc-fc776855e98b43b9832a6fd313097d4f.jpg",
   ]
+
+  useEffect(()=>{
+   setUserIdLocally();
+   showAllFoods();
+  },[])
+  // setUserIdLocally
+  const setUserIdLocally = async()=>{
+    const UserId=await AsyncStorage.getItem("UserId");
+    console.log(UserId+"janghle")
+    if(!UserId){
+      await AsyncStorage.setItem("UserId",JSON.stringify(Math.ceil(Math.random()*1000000000+(9999999999-1000000000))))
+    }
+  }
+  // fetch all foods
+  const showAllFoods=async()=>{
+    const response= await fetch(getAllFoodsRoute,{
+        method:'GET',
+        headers:{
+          "Content-Type":"application/json",
+        },
+      })
+      const json=await response.json();
+      setFoods(json);
+  }
+  // add to card
+  const addToCard=async(food)=>{
+    showAlert(`${food.foodname} Added to Card`);
+    const cardFoods=await AsyncStorage.getItem("cardFoods");
+    const UserId=await AsyncStorage.getItem("UserId");
+
+     if(!cardFoods){ // when null
+      const initialCardFoods=[{
+      uniqueOrderId:Math.ceil(Math.random()*100000000000000+(999999999999999-100000000000000)).toString(),
+      UserId:UserId,
+      EmployeeId:EmployeeId,
+      foodQuantity:1,
+      foodimg:food.foodimg,
+      foodname:food.foodname,
+      foodprice:food.foodprice,
+      _id:food._id
+      }]
+      try {
+        const result=await AsyncStorage.setItem("cardFoods",JSON.stringify(initialCardFoods));
+      } catch (error) {
+        console.log(error);
+      }
+     }else{
+      const cardFoods=JSON.parse(await AsyncStorage.getItem("cardFoods"));
+
+      const singleFood={
+      uniqueOrderId:Math.ceil(Math.random()*100000000000000+(999999999999999-100000000000000)).toString(),
+      UserId:UserId,
+      EmployeeId:EmployeeId,
+      foodQuantity:1,
+      foodimg:food.foodimg,
+      foodname:food.foodname,
+      foodprice:food.foodprice,
+      _id:food._id
+      }
+      cardFoods.push(singleFood);
+      await AsyncStorage.setItem("cardFoods",JSON.stringify(cardFoods));
+     }   
+   }
+  // alert methods
+
+  const [currentAlert, setCurrentAlert] = useState(null);
+
+  const showAlert = (message) => {
+    // Update the current alert
+    hideAlert();
+    setCurrentAlert(message);
+
+    // Clear the alert after a certain duration (e.g., 2000 milliseconds)
+    setTimeout(() => {
+      hideAlert();
+    }, 2000);
+  };
+
+  const hideAlert = () => {
+    // Clear the current alert
+    setCurrentAlert(null);
+  };
+
   return (
     <SafeAreaView
       style={{
@@ -19,6 +107,13 @@ export default function Home() {
         backgroundColor: "white"
       }}
     >
+      {/* alert message here */}
+      {currentAlert && (
+        <View style={{position: 'absolute',top: 0,left: 0,right: 0,backgroundColor: 'green',padding: 10,zIndex:5}}>
+          <Text style={{color: 'white',}}>{currentAlert}</Text>
+        </View>
+      )}
+
       <ScrollView>
         <View style={{
           backgroundColor: "orange",
@@ -45,9 +140,9 @@ export default function Home() {
         {/*  circule Item */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {
-            data.map((element, index) => {
+            foods.map((food) => {
               return (
-                <Pressable key={index} style={{
+                <Pressable onPress={()=>addToCard(food)}  key={food._id} style={{
                   margin: 10,
                   justifyContent: "center",
                   alignItems: "center"
@@ -56,13 +151,13 @@ export default function Home() {
                     width: 70, height: 70,
                     borderRadius: 70 / 2,
                     resizeMode: "contain",
-                  }} source={{ uri: "https://www.verywellhealth.com/thmb/f1Ilvp8yoFZEKP_B_YBK8HO1irE=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/gastritis-diet-what-to-eat-for-better-management-4767967-primary-recirc-fc776855e98b43b9832a6fd313097d4f.jpg" }} />
+                  }} source={{ uri: food.foodimg.length>0?food.foodimg:"http://res.cloudinary.com/do3fiil0d/image/upload/v1700375832/foodimages/kapxhjg9k5ss1kwjnk36.jpg" }} />
                   <Text style={{
                     textAlign: "center",
                     fontSize: 13,
                     fontWeight: "500",
                     marginTop: 3,
-                  }} >{element}</Text>
+                  }} >{food.foodname}</Text>
                 </Pressable>
               )
             })
@@ -78,12 +173,13 @@ export default function Home() {
           flexWrap: "wrap"
         }}>
           {/* Home item card */}
-          <HomeItem/>
-          <HomeItem/>
-          <HomeItem/>
-          <HomeItem/>
-          <HomeItem/>
-          <HomeItem/>
+          {
+            foods.map((food)=>{
+              return(
+                <HomeItem key={food._id} addToCard={addToCard} food={food}/>
+              )
+            })
+          }
          
         </View>
       </ScrollView>
