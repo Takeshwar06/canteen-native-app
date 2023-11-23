@@ -1,4 +1,4 @@
-// main server
+// main server 10.0.2.2:80
 export const host="http://10.0.2.2:5000";
 // api for foodDetails
 export const addfoodRoute=`${host}/api/food/addfood`
@@ -20,6 +20,7 @@ export const expireQr=`${host}/api/order/expireQr`//id
 // api for payment
 export const ordergenerate=`${host}/api/payment/ordergenerate`
 export const paymentVarification=`${host}/api/payment/paymentvarification`
+export const paymentVarificationForApp=`${host}/api/payment/paymentvarificationforapp`
 export const getkey=`${host}/api/payment/getkey`
 
 // api for inventory

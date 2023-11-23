@@ -1,5 +1,5 @@
 import { View, TextInput, Image, Pressable, Text, ScrollView, TouchableOpacity } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Icon from 'react-native-vector-icons/Entypo';
 import { SliderBox } from 'react-native-image-slider-box'
@@ -7,6 +7,7 @@ import HomeItem from '../components/HomeItem';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { EmployeeId, getAllFoodsRoute } from '../utils/APIRoutes';
 import axios from 'axios';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function Home() {
   const [foods,setFoods]=useState([])
@@ -17,12 +18,20 @@ export default function Home() {
     "https://www.verywellhealth.com/thmb/f1Ilvp8yoFZEKP_B_YBK8HO1irE=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/gastritis-diet-what-to-eat-for-better-management-4767967-primary-recirc-fc776855e98b43b9832a6fd313097d4f.jpg",
   ]
 
-  useEffect(()=>{
-   setUserIdLocally();
-   showAllFoods();
-  },[])
+  useFocusEffect(useCallback(()=>{
+    setUserIdLocally();
+    showAllFoods();
+  },[]))
   // setUserIdLocally
   const setUserIdLocally = async()=>{
+    console.log("setemp")
+    await AsyncStorage.removeItem("employee")
+    await AsyncStorage.removeItem("uniqueEmployeeId")
+    // let a="employee"
+    // let b=876546
+    // await AsyncStorage.setItem("employee",JSON.stringify(a))
+    // await AsyncStorage.setItem("uniqueEmployeeId",JSON.stringify(b))
+
     const UserId=await AsyncStorage.getItem("UserId");
     console.log(UserId+"janghle")
     if(!UserId){
@@ -31,7 +40,9 @@ export default function Home() {
   }
   // fetch all foods
   const showAllFoods=async()=>{
+    console.log("showAllFoods called")
     const response= await fetch(getAllFoodsRoute,{
+    // const response= await fetch('https://smartcanteen07.onrender.com/api/food/getAllFoods',{
         method:'GET',
         headers:{
           "Content-Type":"application/json",
@@ -140,9 +151,10 @@ export default function Home() {
         {/*  circule Item */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {
-            foods.map((food) => {
+            foods.map((food,index) => {
               return (
-                <Pressable onPress={()=>addToCard(food)}  key={food._id} style={{
+                <View key={index}>
+                {food.foodAvailable &&<Pressable onPress={()=>addToCard(food)}  key={index} style={{
                   margin: 10,
                   justifyContent: "center",
                   alignItems: "center"
@@ -158,7 +170,8 @@ export default function Home() {
                     fontWeight: "500",
                     marginTop: 3,
                   }} >{food.foodname}</Text>
-                </Pressable>
+                </Pressable>}
+                </View>
               )
             })
           }
@@ -174,9 +187,11 @@ export default function Home() {
         }}>
           {/* Home item card */}
           {
-            foods.map((food)=>{
+            foods.map((food,index)=>{
               return(
-                <HomeItem key={food._id} addToCard={addToCard} food={food}/>
+                <>
+                {food.foodAvailable &&<HomeItem key={index} addToCard={addToCard} food={food}/>}
+                </>
               )
             })
           }

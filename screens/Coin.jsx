@@ -1,145 +1,104 @@
-// import React, { useRef, useState } from 'react';
-// import { View, Text, TouchableOpacity, Animated, StyleSheet } from 'react-native';
-
-// const Coin = () => {
-//   const [alertVisible, setAlertVisible] = useState(false);
-//   const translateY = useRef(new Animated.Value(-100)).current;
-
-//   const showAlert = () => {
-//     setAlertVisible(true);
-
-//     // Slide down animation
-//     Animated.timing(translateY, {
-//       toValue: 0,
-//       duration: 300,
-//       useNativeDriver: true,
-//     }).start();
-
-//     // Hide the alert after a certain duration
-//     setTimeout(() => {
-//       hideAlert();
-//     }, 1500); // Adjust as needed
-//   };
-
-//   const hideAlert = () => {
-//     // Slide up animation
-//     Animated.timing(translateY, {
-//       toValue: -100,
-//       duration: 300,
-//       useNativeDriver: true,
-//     }).start(() => {
-//       setAlertVisible(false);
-//     });
-//   };
-
-//   return (
-//     <View style={styles.container}>
-//       <TouchableOpacity onPress={showAlert} style={styles.button}>
-//         <Text style={styles.buttonText}>Show Custom Alert</Text>
-//       </TouchableOpacity>
-
-//       {alertVisible && (
-//         <Animated.View style={[styles.alert, { transform: [{ translateY }] }]}>
-//           <Text style={styles.alertText}>Success! Your action was successful.</Text>
-//         </Animated.View>
-//       )}
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   button: {
-//     backgroundColor: 'blue',
-//     padding: 10,
-//     borderRadius: 5,
-//   },
-//   buttonText: {
-//     color: 'white',
-//   },
-//   alert: {
-//     position: 'absolute',
-//     top: 0,
-//     left: 0,
-//     right: 0,
-//     backgroundColor: 'green',
-//     padding: 10,
-//   },
-//   alertText: {
-//     color: 'white',
-//   },
-// });
-
-// export default Coin;
-
-
-
-
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Modal, StyleSheet, TouchableOpacity } from 'react-native';
+import IoIcon from 'react-native-vector-icons/Ionicons'
+const App = () => {
+  const [modalVisible, setModalVisible] = useState(false);
 
-const Coin = () => {
-  const [currentAlert, setCurrentAlert] = useState(null);
-
-  const showAlert = (message) => {
-    // Update the current alert
-    setCurrentAlert(message);
-
-    // Clear the alert after a certain duration (e.g., 2000 milliseconds)
-    setTimeout(() => {
-      hideAlert();
-    }, 2000);
-  };
-
-  const hideAlert = () => {
-    // Clear the current alert
-    setCurrentAlert(null);
+  const toggleModal = () => {
+    setModalVisible(!modalVisible);
   };
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={() => showAlert('This is a new alert!')} style={styles.button}>
-        <Text style={styles.buttonText}>Show Alert</Text>
+    <View style={{
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    }}>
+      <TouchableOpacity onPress={toggleModal}>
+        <Text style={styles.openButton}>Open Modal</Text>
       </TouchableOpacity>
 
-      {currentAlert && (
-        <View style={{position: 'absolute',top: 0,left: 0,right: 0,backgroundColor: 'green',padding: 10,}}>
-          <Text style={{color: 'white',}}>{currentAlert}</Text>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          // Handle modal close
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+          <View style={{
+            margin: 20,
+            backgroundColor: 'white',
+            width: "100%",
+            borderRadius: 20,
+            padding: 15,
+            alignItems: 'center',
+          }}>
+            <View style={{ width: "100%", flexDirection: "row", justifyContent: 'flex-end', marginBottom: 30 }} >
+              <TouchableOpacity onPress={toggleModal}>
+                <IoIcon name="close-circle-outline" size={30}></IoIcon>
+              </TouchableOpacity>
+            </View>
+            <Text style={{ fontSize: 18, fontWeight: 500, marginBottom: 30 }}>Please select and option to payments</Text>
+
+            <View style={{
+              width: "100%",
+              flexDirection: "row",
+              justifyContent: "space-around",
+              marginBottom: 25,
+            }}>
+              <TouchableOpacity style={{
+                backgroundColor: "orange",
+                height: 40,
+                width: 80,
+                borderRadius: 20,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }} onPress={toggleModal}>
+                <Text style={{ fontSize: 17, fontWeight: 500 }}>Coin</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={{
+                backgroundColor: "orange",
+                height: 40,
+                width: 80,
+                borderRadius: 20,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }} onPress={toggleModal}>
+                <Text style={{ fontSize: 17, fontWeight: 500 }}>Rupees</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-      )}
+      </Modal>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  button: {
-    backgroundColor: 'blue',
+  openButton: {
+    backgroundColor: '#2196F3',
+    borderRadius: 10,
     padding: 10,
-    borderRadius: 5,
-  },
-  buttonText: {
+    elevation: 2,
     color: 'white',
   },
-  alert: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'green',
+  closeButton: {
+    marginTop: 10,
+    backgroundColor: '#2196F3',
+    borderRadius: 10,
     padding: 10,
-  },
-  alertText: {
+    elevation: 2,
     color: 'white',
   },
 });
 
-export default Coin;
+export default App;

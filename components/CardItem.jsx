@@ -1,4 +1,5 @@
 import { View, Text,Image, TouchableOpacity } from 'react-native'
+import IoIcon from 'react-native-vector-icons/Ionicons'
 import React from 'react'
 
 export default function CardItem({food}) {
@@ -29,6 +30,9 @@ export default function CardItem({food}) {
                   <Text style={{fontSize:20,fontWeight:"bold",marginLeft:20}}>{food.foodQuantity}</Text>
                   <TouchableOpacity style={{height:30,width:30,borderRadius:30/2,backgroundColor:"orange",alignItems:"center",justifyContent:"center",marginLeft:20}}>
                     <Text style={{color:"white",fontSize:20,fontWeight:"bold"}}>+</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={{height:30,width:30,borderRadius:30/2,backgroundColor:"orange",alignItems:"center",justifyContent:"center",marginLeft:40}}>
+                    <IoIcon name="trash" size={19} style={{color:"white"}}/>
                   </TouchableOpacity>
                 </View>
             </View> 
