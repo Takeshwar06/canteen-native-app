@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, StyleSheet, TouchableOpacity } from 'react-native';
 import IoIcon from 'react-native-vector-icons/Ionicons'
-const App = () => {
+const Coin = ({ logOutModal,setLogOutModal,logInModal,setlogInModal}) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const toggleModal = () => {
@@ -101,4 +101,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default Coin;

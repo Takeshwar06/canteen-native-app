@@ -1,16 +1,26 @@
 import { View, SafeAreaView, Text, Pressable, TextInput, TouchableOpacity, Image, ScrollView } from 'react-native'
 import IoIcon from "react-native-vector-icons/Ionicons"
-import React, { useCallback, useState } from 'react'
-import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useContext, useEffect, useState } from 'react'
+import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { getAllFoodsRoute, updateAvailableRoute } from '../utils/APIRoutes';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import foodContext from '../components/context/foods/foodContext';
 
 export default function UpdateFood() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [employee,setEmployee]=useState(null)
   const [searchFood, setSearchFood] = useState([])
   const [foods, setFoods] = useState([])
+  const {setLogOutModal,logInModal,logOutModal,setLogInModal}=useContext(foodContext);
   // to use showAllFoods();
-
+    const fetchempid=async()=>{
+      const localemp=await AsyncStorage.getItem("employee");
+      setEmployee(localemp);
+    }
+    useEffect(()=>{
+       fetchempid();
+    },[logOutModal,logInModal])
   useFocusEffect(useCallback(() => {
     // if (localStorage.getItem("employee")) {
     //   navigate("/updatefood");
@@ -20,11 +30,33 @@ export default function UpdateFood() {
 
   const foodAvailable = async (id, available) => {
     // console.log("foodavbl",id,available);
+    const tempFoods=[...foods];
+    foods.forEach((food,index)=>{
+      if(food._id==id){
+        tempFoods[index].foodAvailable=available;
+        setFoods(tempFoods);
+      }
+    })
     let response = await axios.post(`${updateAvailableRoute}/${id}`, { 
       foodAvailable: available
     })
     
-    // navigate("/updatefood")
+  }
+  // when search then update
+  const foodAvailableWhenSearch = async (id, available) => {
+    // console.log("foodavbl",id,available);
+    const tempFoods=[...searchFood];
+    searchFood.forEach((food,index)=>{
+      if(food._id==id){
+        tempFoods[index].foodAvailable=available;
+        setSearchFood(tempFoods)
+        // setFoods(tempFoods);
+      }
+    })
+    let response = await axios.post(`${updateAvailableRoute}/${id}`, { 
+      foodAvailable: available
+    })
+    
   }
 
   const handleSearchChange = (text) => {
@@ -43,6 +75,8 @@ export default function UpdateFood() {
   // fetching all foods
   const showAllFoods = async () => {
     console.log("showAllFoods called")
+    const localemp=await AsyncStorage.getItem("employee");
+    setEmployee(localemp);
     const response = await fetch(getAllFoodsRoute, {
       // const response= await fetch('https://smartcanteen07.onrender.com/api/food/getAllFoods',{
       method: 'GET',
@@ -81,7 +115,13 @@ export default function UpdateFood() {
           <IoIcon style={{ paddingLeft: 10 }} name="search" size={27} color="#000" />
           <TextInput onChangeText={(text) => handleSearchChange(text)} placeholder="Search" />
         </Pressable>
-        <IoIcon style={{ paddingLeft: 0 }} name="exit" size={28} color="#000" />
+        {employee&&<TouchableOpacity onPress={()=>setLogOutModal(true)}>
+          <IoIcon style={{ paddingLeft: 0 }} name="power" size={28} color="#000" />
+        </TouchableOpacity>}
+
+        {!employee&&<TouchableOpacity onPress={()=>setLogInModal(true)}>
+          <IoIcon style={{ paddingLeft: 0 }} name="person-circle-outline" size={30} color="#000" />
+        </TouchableOpacity>}
       </View>
       <Text style={{
         fontSize: 18, fontWeight: "bold", textAlign: 'center', marginVertical: 5
@@ -140,11 +180,11 @@ export default function UpdateFood() {
                   </View>
                   <View style={{ flexDirection: "row", alignItems: "center", marginTop: 30 }}>
 
-                    {food.foodAvailable && <TouchableOpacity onPress={() => { foodAvailable(food._id, false) }} style={{ marginLeft: 35, height: 40, width: 120, justifyContent: "center", alignItems: "center", backgroundColor: "orange", borderRadius: 20 }} >
+                    {food.foodAvailable && <TouchableOpacity onPress={() => { foodAvailableWhenSearch(food._id, false) }} style={{ marginLeft: 35, height: 40, width: 120, justifyContent: "center", alignItems: "center", backgroundColor: "orange", borderRadius: 20 }} >
                       <Text style={{ fontWeight: 500 }}>NotAvailable</Text>
                     </TouchableOpacity>}
 
-                    {!food.foodAvailable && <TouchableOpacity onPress={() => { foodAvailable(food._id, true) }} style={{ marginLeft: 35, height: 40, width: 120, justifyContent: "center", alignItems: "center", backgroundColor: "orange", borderRadius: 20 }} >
+                    {!food.foodAvailable && <TouchableOpacity onPress={() => { foodAvailableWhenSearch(food._id, true) }} style={{ marginLeft: 35, height: 40, width: 120, justifyContent: "center", alignItems: "center", backgroundColor: "orange", borderRadius: 20 }} >
                       <Text style={{ fontWeight: 500 }}>Available</Text>
                     </TouchableOpacity>}
 

@@ -1,11 +1,12 @@
 import { View, Text, Image,Modal, TextInput, StyleSheet, SafeAreaView, Pressable, ScrollView, TouchableOpacity } from 'react-native'
 import IoIcon from 'react-native-vector-icons/Ionicons';
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { useFocusEffect } from '@react-navigation/native';
 import { addCoin, expireQr,addorder, getAllOrderForEmployee, getCoin, host, updateCoin, updateOrder, updateReject, updateTake, EmployeeId, getAllOrderForUser, updateDeleted} from '../utils/APIRoutes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import io from 'socket.io-client';
 import axios from 'axios';
+import foodContext from '../components/context/foods/foodContext';
 
 export default function Message() {
   const socket=useRef();
@@ -16,8 +17,16 @@ export default function Message() {
   const [employee,setEmployee]=useState(null);
   const [uniqueEmployeeId,setUniqueEmployeeId]=useState(null);
   const [qrUrl, setQrUrl] = useState(null);
+  const {setLogOutModal,logInModal,logOutModal,setLogInModal}=useContext(foodContext);
 
   // socket connect when  user enter this screep
+  const fetchempid=async()=>{
+    const localemp=await AsyncStorage.getItem("employee");
+    setEmployee(localemp);
+  }
+  useEffect(()=>{
+     fetchempid();
+  },[logOutModal,logInModal])
   useFocusEffect(useCallback(()=>{
     fetchUserData();
     if(socket.current){
@@ -34,12 +43,12 @@ export default function Message() {
     const userid=await AsyncStorage.getItem("UserId");
     setUserId(userid);
     const isemployee=await AsyncStorage.getItem("employee")
+    setEmployee(isemployee);
     console.log("isemployee",isemployee)
     socket.current=io(host)
     socket.current.emit("add-user",userid)
     if(isemployee){
       console.log("hello")
-      setEmployee(isemployee);
       const uniqueEmployee=await AsyncStorage.getItem("uniqueEmployeeId")
       setUniqueEmployeeId(uniqueEmployee)
       socket.current.emit("add-employee",uniqueEmployee);
@@ -354,7 +363,13 @@ useEffect(()=>{
           <IoIcon style={{ paddingLeft: 10 }} name="search" size={27} color="#000" />
           <TextInput placeholder="Search" />
         </Pressable>
-        <IoIcon style={{ paddingLeft: 0 }} name="exit" size={28} color="#000" />
+        {employee&&<TouchableOpacity onPress={()=>setLogOutModal(true)}>
+          <IoIcon style={{ paddingLeft: 0 }} name="power" size={28} color="#000" />
+        </TouchableOpacity>}
+
+        {!employee&&<TouchableOpacity onPress={()=>setLogInModal(true)}>
+          <IoIcon style={{ paddingLeft: 0 }} name="person-circle-outline" size={30} color="#000" />
+        </TouchableOpacity>}
       </View>
       {/* for user */}
       {!employee&& <Text style={{
@@ -406,7 +421,7 @@ useEffect(()=>{
       {/* for employee message box */}
       {
         employee&&employeeOrder.map((Order,index)=>{
-          console.log("checking take undefined",Order)
+          // console.log("checking take undefined",Order)
           return(
            <>
               {(uniqueEmployeeId===Order.take.takenByMe||

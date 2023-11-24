@@ -1,4 +1,4 @@
-import React ,{useState,useCallback} from 'react'
+import React ,{useState,useCallback, useContext, useEffect} from 'react'
 import {
   StyleSheet,
   Text,View,Modal,Image,
@@ -7,15 +7,32 @@ import {
 import IoIcon from 'react-native-vector-icons/Ionicons'
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import { RNCamera } from 'react-native-camera';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { expireQr, getOrderThroughQr } from '../utils/APIRoutes';
+import foodContext from '../components/context/foods/foodContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Scanner() {
   const [toggleScanner,setToggleScanner]=useState(false)
   const [result,setResult]=useState(undefined);
+  const [employee,setEmployee]=useState(null)
+  const {setLogOutModal,logOutModal,setLogInModal}=useContext(foodContext);
+  const navigation=useNavigation();
+
+  const fetchempid=async()=>{
+    const localemp=await AsyncStorage.getItem("employee");
+    if(!localemp){
+      navigation.navigate("Home")
+    }
+    setEmployee(localemp);
+  }
+  useEffect(()=>{
+     fetchempid();
+  },[logOutModal])
 
   useFocusEffect(useCallback(()=>{
     console.log("useFocus scanner")
+    fetchempid();
     setToggleScanner(false);
   },[]))
 

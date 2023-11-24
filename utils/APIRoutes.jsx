@@ -1,5 +1,6 @@
 // main server 10.0.2.2:80
 export const host="http://10.0.2.2:5000";
+// export const host="http://localhost:5000";
 // api for foodDetails
 export const addfoodRoute=`${host}/api/food/addfood`
 export const getAllFoodsRoute=`${host}/api/food/getAllFoods`
