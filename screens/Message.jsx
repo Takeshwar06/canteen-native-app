@@ -2,7 +2,7 @@ import { View, Text, Image,Modal, TextInput, StyleSheet, SafeAreaView, Pressable
 import IoIcon from 'react-native-vector-icons/Ionicons';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { useFocusEffect } from '@react-navigation/native';
-import { addCoin, expireQr,addorder, getAllOrderForEmployee, getCoin, host, updateCoin, updateOrder, updateReject, updateTake, EmployeeId, getAllOrderForUser, updateDeleted} from '../utils/APIRoutes';
+import { addCoin, expireQr, getAllOrderForEmployee, getCoin, host, updateCoin, updateOrder, updateReject, updateTake, EmployeeId, getAllOrderForUser, updateDeleted} from '../utils/APIRoutes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import io from 'socket.io-client';
 import axios from 'axios';
@@ -12,7 +12,6 @@ export default function Message() {
   const socket=useRef();
   const [userOrder,setUserOrder]=useState([]);
   const [employeeOrder,setEmployeeOrder]=useState([]);
-  const [refreshAfterAddFood,setRefreshAfterAddFood]=useState(null);// not imp
   const [UserId,setUserId]=useState(null);
   const [employee,setEmployee]=useState(null);
   const [uniqueEmployeeId,setUniqueEmployeeId]=useState(null);
@@ -27,13 +26,9 @@ export default function Message() {
   useEffect(()=>{
      fetchempid();
   },[logOutModal,logInModal])
+
   useFocusEffect(useCallback(()=>{
     fetchUserData();
-    if(socket.current){
-      socket.current.on("rejected-order",data=>{
-        console.log("rejected called")
-      })
-    }
     initailizeSocket();
     sendOrderToSocket();
 },[]))
@@ -67,34 +62,14 @@ export default function Message() {
           cardFoods,referenceNum
       })
          console.log("cardFoods avalablel in local")
-          addOrder(cardFoods,referenceNum);
+          // addOrder(cardFoods,referenceNum);
           fetchUserData();
+          await AsyncStorage.removeItem("referenceNum")
           await AsyncStorage.removeItem("cardFoods")
       }
       console.log("after add order")
-      
       }
   }
-  // addOrder to data-base
-  const addOrder=async(cardFoods,order_id)=>{
-    console.log("addorder called")
-    cardFoods.forEach(async(food) => {
-      const response= await axios.post(addorder,{ 
-        uniqueOrderId:food.uniqueOrderId,
-        foodname:food.foodname,
-        UserId:food.UserId,
-        EmployeeId:food.EmployeeId,
-        foodQuantity:food.foodQuantity,
-        foodprice:food.foodprice,
-        foodimg:food.foodimg,
-        placed:false,
-        order_id:order_id
-       })
-       if(response){
-         setRefreshAfterAddFood(order_id);
-       }
-    });  
-}
 
 // delet order by user
 const orderDeleted=async(Order,index)=>{
@@ -384,9 +359,9 @@ useEffect(()=>{
       {
         !employee&&userOrder.map((Order,index)=>{
           return(
-            <View key={index} style={{ height: 150, paddingBottom: 10, margin: 10, flexDirection: "row", borderWidth: 1, borderBlockColor: "black", borderTopWidth: 0, borderLeftWidth: 0, borderRightWidth: 0 }}>
+            <View key={index} style={{  paddingBottom: 10, margin: 10, flexDirection: "row",alignItems:"center", borderWidth: 1, borderBlockColor: "black", borderTopWidth: 0, borderLeftWidth: 0, borderRightWidth: 0 }}>
             <Image style={{ height: 130, width: "40%", resizeMode: "contain", borderRadius: 5 }} source={{ uri:Order.foodimg.length>0?Order.foodimg: "https://www.verywellhealth.com/thmb/f1Ilvp8yoFZEKP_B_YBK8HO1irE=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/gastritis-diet-what-to-eat-for-better-management-4767967-primary-recirc-fc776855e98b43b9832a6fd313097d4f.jpg" }} />
-            <View style={{ height: 130, width: "60%", paddingHorizontal: 15 }}>
+            <View style={{ width: "60%", paddingHorizontal: 15 }}>
                 {/* <Text style={{color:"white", textAlign: "center", borderRadius: 4, fontWeight: "bold", backgroundColor: "#f0806c" }}>red</Text> */}
                 {!Order.rejected&& <Text style={{color:"white", textAlign: "center", borderRadius: 4, fontWeight: "bold", backgroundColor: `${Order.placed?"#77eb54":"#f0806c"}` }}>{Order.placed?"prepared":"preparing"}</Text> }
                 {Order.rejected&& <Text style={{color:"white", textAlign: "center", borderRadius: 4, fontWeight: "bold", backgroundColor: "#ede43e" }}>Rejected</Text>}
@@ -410,7 +385,7 @@ useEffect(()=>{
                 <View >
                     <Text style={{ fontSize: 20, fontWeight: "500", marginTop: 5 }}>{capitalizeEachWord(Order.foodname)} :: ₹{Order.foodprice}</Text>
                     <Text style={{ fontSize: 16, fontWeight: "500", marginTop: 5 }}>Total : {Order.foodprice}X{Order.foodQuantity}=₹{Order.foodprice*Order.foodQuantity}</Text>
-                    <Text style={{ fontSize: 16, fontWeight: "500", marginTop: 5 }}>orderId : {Order.referenceNum}</Text>
+                    <Text style={{ fontSize: 16, fontWeight: "500", marginTop: 5 }}>orderId : {Order.order_id}</Text>
                 </View>
             </View>
         </View>
@@ -432,16 +407,16 @@ useEffect(()=>{
                    <Text style={{ fontSize: 18, fontWeight: "500", marginTop: 3 }}>Qnty : {Order.foodQuantity}</Text>
                    <Text style={{ fontSize: 18, fontWeight: "500", marginTop: 3 }}>Price : ₹{Order.foodprice}</Text>
                    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-around", marginTop: 10 }}>
-                     {Order.take.notTaken&&<TouchableOpacity onPress={()=>takeOrder(Order,uniqueEmployeeId,index)} style={{height: 30, width: 70, justifyContent: "center", alignItems: "center", backgroundColor: "orange", borderRadius: 3 }} >
-                       <Text style={{ fontWeight: "bold" }}>Take</Text>
+                     {Order.take.notTaken&&<TouchableOpacity onPress={()=>takeOrder(Order,uniqueEmployeeId,index)} style={{height: 30, width: 70, justifyContent: "center", alignItems: "center", backgroundColor: "orange", borderRadius: 20 }} >
+                       <Text style={{ fontWeight: 500,color:"white" }}>Take</Text>
                      </TouchableOpacity>}
            
-                     {!Order.take.notTaken&&<TouchableOpacity onPress={() => { upDateOrder(Order,index) }} style={{ height: 30, width: 70, justifyContent: "center", alignItems: "center", backgroundColor: "orange", borderRadius: 3 }} >
-                       <Text style={{ fontWeight: "bold" }}>Complete</Text>
+                     {!Order.take.notTaken&&<TouchableOpacity onPress={() => { upDateOrder(Order,index) }} style={{ height: 30, width: 70, justifyContent: "center", alignItems: "center", backgroundColor: "#4adb40", borderRadius: 20 }} >
+                       <Text style={{ fontWeight: 500,color:"white" }}>Complete</Text>
                      </TouchableOpacity>}
      
-                     {!Order.take.notTaken&&<TouchableOpacity onPress={()=>rejectOrder(Order,index)} style={{ height: 30, width: 70, justifyContent: "center", alignItems: "center", backgroundColor: "orange", borderRadius: 3 }} >
-                       <Text style={{ fontWeight: "bold" }}>Reject</Text>
+                     {!Order.take.notTaken&&<TouchableOpacity onPress={()=>rejectOrder(Order,index)} style={{ height: 30, width: 70, justifyContent: "center", alignItems: "center", backgroundColor: "#ff2f00", borderRadius: 20 }} >
+                       <Text style={{ fontWeight: 500,color:"white" }}>Reject</Text>
                      </TouchableOpacity>}
            
                    </View>

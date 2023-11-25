@@ -1,9 +1,9 @@
-import { View, Text, Modal, Image, TextInput, StyleSheet, SafeAreaView, Pressable, ScrollView, TouchableOpacity } from 'react-native'
+import { View, Text, Modal, Image, TextInput,ActivityIndicator, StyleSheet, SafeAreaView, Pressable, ScrollView, TouchableOpacity } from 'react-native'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import RazorpayCheckout from 'react-native-razorpay';
-import { getCoin, updateCoin, getkey, ordergenerate, paymentVarificationForApp } from '../utils/APIRoutes';
+import { getCoin, updateCoin, addorder, getkey, ordergenerate, paymentVarificationForApp } from '../utils/APIRoutes';
 import axios from 'axios';
 import IoIcon from 'react-native-vector-icons/Ionicons'
 import foodContext from '../components/context/foods/foodContext';
@@ -11,9 +11,11 @@ import foodContext from '../components/context/foods/foodContext';
 export default function AddCard() {
   const [foods, setFoods] = useState([]);
   const [total, setTotal] = useState(0);
-  const[employee, setEmployee] = useState(null)
+  const [employee, setEmployee] = useState(null)
+  const [successModal, setSuccessModal] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const {setLogOutModal,setLogInModal}=useContext(foodContext);
+  const { setLogOutModal, setLogInModal } = useContext(foodContext);
+  const [isLoading, setIsLoading] = useState(true);
   const navigation = useNavigation();
 
   // fetching card foods from AsyncStorage
@@ -30,7 +32,9 @@ export default function AddCard() {
     }
   }
   useFocusEffect(useCallback(() => {
-    console.log("tigerfoucuEfefect")
+    setIsLoading(true);
+    setSuccessModal(false);
+    setModalVisible(false);
     fetchCardFoods();
   }, [])
   );
@@ -56,6 +60,8 @@ export default function AddCard() {
   // coin process code
   const coinPorcess = async (total) => {
     console.log("coin process started")
+    setModalVisible(false);
+    setSuccessModal(true);
     const UserId = await AsyncStorage.getItem("UserId");
     const data = await axios.post(getCoin, { userId: UserId })
     console.log(data);
@@ -70,16 +76,20 @@ export default function AddCard() {
         console.log("acknowl")
         const referenceNum = `coin%${Math.ceil(Math.random() * 100000 + (999999 - 100000))}`
         await AsyncStorage.setItem("referenceNum", referenceNum);
-        setModalVisible(false)
-        navigation.navigate("Message");
-      } else { alert("order failed try again") }
+        const cardFoods = JSON.parse(await AsyncStorage.getItem("cardFoods"));
+        addOrder(cardFoods, referenceNum);
+        // setModalVisible(false)
+        // navigation.navigate("Message");
+      } else {setSuccessModal(false); alert("order failed try again");}
     } else {
+      setSuccessModal(false);
       alert("you have not coin to buy this food")
     }
   }
   // payment process code
   const paymentProcess = async (total) => {
-
+      setModalVisible(false);
+      setSuccessModal(true);
     try {
       const { data: { key } } = await axios.get(getkey);
       const { data: { order } } = await axios.post(ordergenerate, {
@@ -116,9 +126,12 @@ export default function AddCard() {
           razorpay_signature: data.razorpay_signature,
         })
         console.log(response);
-        setModalVisible(false)
-        navigation.navigate("Message");
-        alert(`Success: ${data.razorpay_payment_id}`);
+        await AsyncStorage.setItem("referenceNum", JSON.stringify(data.razorpay_order_id));
+        const cardFoods = JSON.parse(await AsyncStorage.getItem("cardFoods"));
+        addOrder(cardFoods, data.razorpay_order_id);
+        // setModalVisible(false)
+        // navigation.navigate("Message");
+        // alert(`Success: ${data.razorpay_payment_id}`);
       }).catch((error) => {
         // handle failure
         alert(`Error: ${error.code} | ${error.description}`);
@@ -128,6 +141,30 @@ export default function AddCard() {
       console.log(err);
     }
   }
+
+  // addOrder to data-base
+  const addOrder = async (cardFoods, order_id) => {
+    console.log("addorder called")
+    cardFoods.forEach(async (food) => {
+      const response = await axios.post(addorder, {
+        uniqueOrderId: food.uniqueOrderId,
+        foodname: food.foodname,
+        UserId: food.UserId,
+        EmployeeId: food.EmployeeId,
+        foodQuantity: food.foodQuantity,
+        foodprice: food.foodprice,
+        foodimg: food.foodimg,
+        placed: false,
+        order_id: order_id
+      })
+    });
+    setIsLoading(false);
+    setTimeout(() => {
+      setIsLoading(true);
+      navigation.navigate("Message");
+    }, 800);
+  }
+
   // food quantity ++
   const foodQuantityPlus = async (index) => {
     const cardFoods = JSON.parse(await AsyncStorage.getItem("cardFoods"));
@@ -197,11 +234,11 @@ export default function AddCard() {
               <IoIcon style={{ paddingLeft: 10 }} name="search" size={27} color="#000" />
               <TextInput placeholder="Search" />
             </Pressable>
-            {employee && <TouchableOpacity onPress={()=>setLogOutModal(true)}>
+            {employee && <TouchableOpacity onPress={() => setLogOutModal(true)}>
               <IoIcon style={{ paddingLeft: 0 }} name="power" size={28} color="#000" />
             </TouchableOpacity>}
 
-            {!employee && <TouchableOpacity onPress={()=>setLogInModal(true)}>
+            {!employee && <TouchableOpacity onPress={() => setLogInModal(true)}>
               <IoIcon style={{ paddingLeft: 0 }} name="person-circle-outline" size={30} color="#000" />
             </TouchableOpacity>}
           </View>
@@ -323,6 +360,60 @@ export default function AddCard() {
                   <Text style={{ fontSize: 17, fontWeight: 500 }}>Rupees</Text>
                 </TouchableOpacity>
               </View>
+            </View>
+          </View>
+        </Modal>
+      </View>
+
+      {/*success modal section */}
+      <View style={{
+        // flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+
+      }}>
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={successModal}
+          onRequestClose={() => {
+            // Handle modal close
+            setSuccessModal(!successModal);
+          }}
+        >
+          <View style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: "rgba(255, 255, 255, 0.7)"
+          }}>
+            <View style={{
+              margin: 20,
+              backgroundColor: 'white',
+              width: "80%",
+              borderWidth: isLoading?0:1,
+              borderColor: "green",
+              borderRadius: 20,
+              overflow: "hidden",
+              alignItems: 'center',
+            }}>
+              
+             {isLoading&& <View style={{width:"100%",display:"flex",justifyContent:"center",alignItems:"center"}}>
+              <ActivityIndicator size="large" color="green" />
+              </View>}
+              {!isLoading&&<View style={{ width: "100%" }}>
+                <View style={{
+                  width: "100%", height: 120, backgroundColor: "green",
+                  display: "flex", justifyContent: "center",
+                  alignItems: "center",
+                }}>
+                  <IoIcon name="checkmark-circle-outline" size={110} color="white" />
+                </View>
+                <View style={{ width: "100%", height: 100 }}>
+                  <Text style={{ marginTop: 5, fontSize: 25, fontWeight: 500, color: "green", textAlign: "center" }}>Success!</Text>
+                  <Text style={{ fontSize: 15, fontWeight: 500, textAlign: "center", marginVertical: 5 }}>payment has been successful</Text>
+                </View>
+              </View>}
             </View>
           </View>
         </Modal>

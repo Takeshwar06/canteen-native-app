@@ -60,7 +60,7 @@ export default function WrapApp() {
         visible={logInModal}
         onRequestClose={() => {
           // Handle modal close
-          setModalVisible(!logInModal);
+          setLogInModal(!logInModal);
         }}
       >
         <View style={{
