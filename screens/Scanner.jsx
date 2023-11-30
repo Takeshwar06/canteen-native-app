@@ -11,6 +11,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { expireQr, getOrderThroughQr } from '../utils/APIRoutes';
 import foodContext from '../components/context/foods/foodContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 export default function Scanner() {
   const [toggleScanner,setToggleScanner]=useState(false)

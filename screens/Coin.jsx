@@ -50,8 +50,13 @@ function errorOfFunction(){
     <ScrollView>
       {/* alert message here */}
       {error && (
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: 'red', padding: 10, zIndex: 5 }}>
-          <Text style={{ color: 'white', }}>{error}</Text>
+         <View style={{ 
+          position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: '#f78f8f', padding: 10, zIndex: 5,
+          flexDirection:"row",justifyContent:"space-between",borderWidth:2,borderColor:"red",
+          borderRadius:7
+         }}>
+          <Text style={{ color: 'black',fontWeight:500 }}>{error}</Text>
+          <Icon name="close-circle-outline" size={24} color="black"/>
         </View>
       )}
       <View style={{ display: "flex", alignItems: "center", height: "100%" }} >

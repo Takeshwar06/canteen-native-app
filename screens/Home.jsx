@@ -9,16 +9,18 @@ import { EmployeeId, getAllFoodsRoute } from '../utils/APIRoutes';
 import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
 import foodContext from '../components/context/foods/foodContext';
+import DefaultHome from '../components/DefaultHome';
 
 export default function Home() {
   const [foods, setFoods] = useState([])
   const [employee,setEmployee]=useState(null)
+  const [isLoading,setIsLoading]=useState(true);
   const {setLogOutModal,logInModal,logOutModal,setLogInModal}=useContext(foodContext);
 
   const images = [
-    "https://www.verywellhealth.com/thmb/f1Ilvp8yoFZEKP_B_YBK8HO1irE=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/gastritis-diet-what-to-eat-for-better-management-4767967-primary-recirc-fc776855e98b43b9832a6fd313097d4f.jpg",
-    "https://www.verywellhealth.com/thmb/f1Ilvp8yoFZEKP_B_YBK8HO1irE=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/gastritis-diet-what-to-eat-for-better-management-4767967-primary-recirc-fc776855e98b43b9832a6fd313097d4f.jpg",
-    "https://www.verywellhealth.com/thmb/f1Ilvp8yoFZEKP_B_YBK8HO1irE=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/gastritis-diet-what-to-eat-for-better-management-4767967-primary-recirc-fc776855e98b43b9832a6fd313097d4f.jpg",
+    "https://res.cloudinary.com/do3fiil0d/image/upload/v1701331699/foodimages/m9o47fltqd54zjlpo7kn.jpg",
+    "https://res.cloudinary.com/do3fiil0d/image/upload/v1701331674/foodimages/bcpmd0g2n8i75jvtvqkx.webp",
+    "https://res.cloudinary.com/do3fiil0d/image/upload/v1701331654/foodimages/ehsk8pyfusovcdks1wfv.jpg",
   ]
 
   const fetchempid=async()=>{
@@ -63,6 +65,7 @@ export default function Home() {
     })
     const json = await response.json();
     setFoods(json);
+    setIsLoading(false);
   }
   // add to card
   const addToCard = async (food) => {
@@ -139,8 +142,13 @@ export default function Home() {
     >
       {/* alert message here */}
       {currentAlert && (
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: 'green', padding: 10, zIndex: 5 }}>
-          <Text style={{ color: 'white', }}>{currentAlert}</Text>
+        <View style={{ 
+          position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: '#97f7c2', padding: 10, zIndex: 5,
+          flexDirection:"row",justifyContent:"space-between",borderWidth:2,borderColor:"green",
+          borderRadius:7
+         }}>
+          <Text style={{ color: 'black',fontWeight:500 }}>{currentAlert}</Text>
+          <Icon name="close-circle-outline" size={24} color="black"/>
         </View>
       )}
 
@@ -172,7 +180,8 @@ export default function Home() {
           <Icon style={{ paddingLeft: 0 }} name="person-circle-outline" size={30} color="#000" />
         </TouchableOpacity>}
       </View>
-      <ScrollView>
+     {isLoading&& <DefaultHome/>}
+      {!isLoading&&<ScrollView>
         {/*  circule Item */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {
@@ -202,7 +211,7 @@ export default function Home() {
           }
         </ScrollView>
         <SliderBox images={images} autoPlay circleLoop />
-        <Text style={{ padding: 10, fontSize: 20, fontWeight: "bold" }} >Trending Deasl of the week</Text>
+        <Text style={{ padding: 10, fontSize: 19, fontWeight: 500 }} >Eat! What makes you Happy</Text>
         {/* card Item */}
 
         <View style={{
@@ -222,7 +231,8 @@ export default function Home() {
           }
 
         </View>
-      </ScrollView>
+      </ScrollView>}
+      
     </SafeAreaView>
   )
 }

@@ -175,9 +175,11 @@ export default function AddCard() {
   // food quantity --
   const foodQuantityMinus = async (index) => {
     const cardFoods = JSON.parse(await AsyncStorage.getItem("cardFoods"));
-    cardFoods[index].foodQuantity--;
-    setFoods(cardFoods);
-    await AsyncStorage.setItem("cardFoods", JSON.stringify(cardFoods))
+     if(cardFoods[index].foodQuantity>1){
+      cardFoods[index].foodQuantity--;
+      setFoods(cardFoods);
+      await AsyncStorage.setItem("cardFoods", JSON.stringify(cardFoods))
+     }
   }
   // food delete from cardFoods
   const foodDelete = async (index) => {
@@ -346,7 +348,7 @@ export default function AddCard() {
                   alignItems: "center",
                   justifyContent: "center",
                 }} onPress={() => coinPorcess(total)}>
-                  <Text style={{ fontSize: 17, fontWeight: 500 }}>Coin</Text>
+                  <Text style={{ fontSize: 17, fontWeight: 500,color:"white" }}>Coin</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={{
                   backgroundColor: "orange",
@@ -357,7 +359,7 @@ export default function AddCard() {
                   alignItems: "center",
                   justifyContent: "center",
                 }} onPress={() => paymentProcess(total)}>
-                  <Text style={{ fontSize: 17, fontWeight: 500 }}>Rupees</Text>
+                  <Text style={{ fontSize: 17, fontWeight: 500,color:"white" }}>Rupees</Text>
                 </TouchableOpacity>
               </View>
             </View>

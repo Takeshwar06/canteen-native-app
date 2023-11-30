@@ -38,6 +38,10 @@ export default function WrapApp() {
      const logIn=async(email,password)=>{
           if(email==='tiger@gmail.com'&&password==='t tiger'){
             await AsyncStorage.setItem("employee","employee");
+            const uniqueEmployeeId=await AsyncStorage.getItem("uniqueEmployeeId");
+            if(!uniqueEmployeeId){
+              await AsyncStorage.setItem("uniqueEmployeeId",`EmployeeId${Math.ceil(Math.random()*1000+(9999-1000))}`) // uniqe employee
+              }
              setEmail(""); 
              setPassword("");
              setLogInModal(false);
@@ -196,7 +200,7 @@ export default function WrapApp() {
                 alignItems: "center",
                 justifyContent: "center",
               }} onPress={() => setLogOutModal(false)}>
-                <Text style={{ fontSize: 17, fontWeight: 500 }}>Cancel</Text>
+                <Text style={{ fontSize: 17, fontWeight: 500,color:"white" }}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={{
                 backgroundColor: "orange",
@@ -207,7 +211,7 @@ export default function WrapApp() {
                 alignItems: "center",
                 justifyContent: "center",
               }} onPress={() => logOut()}>
-                <Text style={{ fontSize: 17, fontWeight: 500 }}>logout</Text>
+                <Text style={{ fontSize: 17, fontWeight: 500,color:"white" }}>logout</Text>
               </TouchableOpacity>
             </View>
           </View>

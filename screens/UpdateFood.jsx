@@ -78,7 +78,6 @@ export default function UpdateFood() {
     const localemp=await AsyncStorage.getItem("employee");
     setEmployee(localemp);
     const response = await fetch(getAllFoodsRoute, {
-      // const response= await fetch('https://smartcanteen07.onrender.com/api/food/getAllFoods',{
       method: 'GET',
       headers: {
         "Content-Type": "application/json",
@@ -113,7 +112,7 @@ export default function UpdateFood() {
 
         }}>
           <IoIcon style={{ paddingLeft: 10 }} name="search" size={27} color="#000" />
-          <TextInput onChangeText={(text) => handleSearchChange(text)} placeholder="Search" />
+          <TextInput onChangeText={(text) => handleSearchChange(text)} placeholder="Search Food" />
         </Pressable>
         {employee&&<TouchableOpacity onPress={()=>setLogOutModal(true)}>
           <IoIcon style={{ paddingLeft: 0 }} name="power" size={28} color="#000" />

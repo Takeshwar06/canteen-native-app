@@ -95,8 +95,10 @@ const orderDeleted=async(Order,index)=>{
     if(socket.current){
       socket.current.on("rejected-order",(data)=>{
         console.log("rejected-orderr called")
+        console.log("userData",userOrder);
         const tempUserOrder=[...userOrder]
-       userOrder.forEach((element,index)=>{
+        tempUserOrder.forEach((element,index)=>{
+        console.log(element.uniqueOrderId,"--",data.uniqueOrderId);
          if(element.uniqueOrderId==data.uniqueOrderId){
           tempUserOrder[index].rejected=true;
           tempUserOrder[index].QRvalid=false;
@@ -162,13 +164,13 @@ useEffect(()=>{
     }
     else{
       //  addCoin
-      const response=await axios.post(addCoin,{userId:order.auth[0],coin:order.foodprice})
+      const response=await axios.post(addCoin,{userId:order.auth[0],coin:order.foodprice*order.foodQuantity})
     }
   }
   // when taking order by employye
   const takeOrder = async (order,employeeId,index) => { 
     console.log("empid",order); //
-
+   console.log(employeeId)
     if(employeeId){
    const response=await axios.post(`${updateTake}/${order.uniqueOrderId}`, { take:{
       notTaken:false, 
@@ -190,14 +192,23 @@ useEffect(()=>{
      socket.current.on("took-order",({order,employeeId,index})=>{
        console.log("taked order by another emp",employeeId);
      let data=[...employeeOrder];
-     console.log(data);
-     if(data.length>0){  // &&data[index]._id===order._id
-         order.take.notTaken=false;
-         order.take.takenByMe=employeeId;
-         data[index]=order
-         console.log("data[index]",data[index])
-         setEmployeeOrder(data);  // dynamically generated order card not take due to order._id 
+     const indexOfFood = data.findIndex(obj => obj.uniqueOrderId == order.uniqueOrderId);
+     console.log(indexOfFood);
+     if (indexOfFood !== -1) {
+      order.take.notTaken=false;
+      order.take.takenByMe=employeeId;
+      data[indexOfFood]=order
+      console.log("data[index]",data[indexOfFood])
+      setEmployeeOrder(data); 
      }
+     console.log(data);
+    //  if(data.length>0){  // &&data[index]._id===order._id
+    //      order.take.notTaken=false;
+    //      order.take.takenByMe=employeeId;
+    //      data[index]=order
+    //      console.log("data[index]",data[index])
+    //      setEmployeeOrder(data);  // dynamically generated order card not take due to order._id 
+    //  }
  
      })
     }
@@ -287,17 +298,16 @@ useEffect(()=>{
           <View style={{
             margin: 20,
             backgroundColor: 'white',
-            width: "95%",
+            width: "90%",
             borderWidth:1.5,
             borderColor:"orange",
             borderRadius: 20,
             padding: 15,
             alignItems: 'center',
           }}>
-            <View style={{ width: "100%", flexDirection: "row", justifyContent: 'flex-end',}} >
-              <TouchableOpacity onPress={()=>setQrUrl(null)}>
-                <IoIcon name="close-circle-outline" size={30} ></IoIcon>
-              </TouchableOpacity>
+            <View style={{ width: "100%", flexDirection: "row",position:"relative",zIndex:1, justifyContent: 'center',}} >
+            <Text style={{textAlign:"center",position:"relative",fontWeight:500,zIndex:5}}>After 2 hour QR will be expire,When food prepared</Text>
+              
             </View>
             <View style={{height:300,width:300,marginBottom:25,flexDirection:"column",justifyContent:"center",alignItems:"center"}}>
             <Image style={{ height:300,width:300 }} source={{ uri:qrUrl?qrUrl:"tiger.jpg" }} />
@@ -349,7 +359,7 @@ useEffect(()=>{
       {/* for user */}
       {!employee&& <Text style={{
         fontSize: 18, fontWeight: "bold", textAlign: 'center', marginVertical: 5
-      }}>Please Order your Food</Text> }
+      }}>Use QR to get food</Text> }
 
       {/* for Employee */}
       {employee&&<Text style={{ fontSize: 18, fontWeight: "bold", marginVertical: 5, marginHorizontal: 10, }}>Total Order 40</Text>}
@@ -377,7 +387,7 @@ useEffect(()=>{
                         <IoIcon name="trash" size={22} color="grey" />
                         </TouchableOpacity>}
 
-                       {Order.placed&& <TouchableOpacity  onPress={()=>orderDeleted(Order,index)}>
+                       {Order.placed&&!Order.QRvalid&& <TouchableOpacity  onPress={()=>orderDeleted(Order,index)}>
                         <IoIcon name="trash" size={22} color="grey" />
                         </TouchableOpacity>}
                     </View>
@@ -386,6 +396,7 @@ useEffect(()=>{
                     <Text style={{ fontSize: 20, fontWeight: "500", marginTop: 5 }}>{capitalizeEachWord(Order.foodname)} :: ₹{Order.foodprice}</Text>
                     <Text style={{ fontSize: 16, fontWeight: "500", marginTop: 5 }}>Total : {Order.foodprice}X{Order.foodQuantity}=₹{Order.foodprice*Order.foodQuantity}</Text>
                     <Text style={{ fontSize: 16, fontWeight: "500", marginTop: 5 }}>orderId : {Order.order_id}</Text>
+                    <Text>{Order.uniqueOrderId}</Text>
                 </View>
             </View>
         </View>
