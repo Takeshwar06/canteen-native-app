@@ -18,9 +18,9 @@ export default function Home() {
   const {setLogOutModal,logInModal,logOutModal,setLogInModal}=useContext(foodContext);
 
   const images = [
-    "https://res.cloudinary.com/do3fiil0d/image/upload/v1701331699/foodimages/m9o47fltqd54zjlpo7kn.jpg",
+    "https://res.cloudinary.com/do3fiil0d/image/upload/v1701541562/pasta2_tsbuzq.webp",
     "https://res.cloudinary.com/do3fiil0d/image/upload/v1701331674/foodimages/bcpmd0g2n8i75jvtvqkx.webp",
-    "https://res.cloudinary.com/do3fiil0d/image/upload/v1701331654/foodimages/ehsk8pyfusovcdks1wfv.jpg",
+    "https://res.cloudinary.com/do3fiil0d/image/upload/v1701541913/piza_ahfmxg.jpg",
   ]
 
   const fetchempid=async()=>{

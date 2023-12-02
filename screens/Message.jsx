@@ -377,7 +377,6 @@ export default function Message() {
                     <Text style={{ fontSize: 20, fontWeight: "500", marginTop: 5 }}>{capitalizeEachWord(Order.foodname)} :: ₹{Order.foodprice}</Text>
                     <Text style={{ fontSize: 16, fontWeight: "500", marginTop: 5 }}>Total : {Order.foodprice}X{Order.foodQuantity}=₹{Order.foodprice * Order.foodQuantity}</Text>
                     <Text style={{ fontSize: 16, fontWeight: "500", marginTop: 5 }}>orderId : {Order.order_id}</Text>
-                    <Text>{Order.uniqueOrderId}</Text>
                   </View>
                 </View>
               </View>

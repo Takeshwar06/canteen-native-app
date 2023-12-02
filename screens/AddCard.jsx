@@ -104,7 +104,7 @@ export default function AddCard() {
         currency: "INR",
         name: "Smart-Canteen",
         description: "Test Transaction",
-        image: 'https://res.cloudinary.com/do3fiil0d/image/upload/v1700605328/foodimages/rlqhj8e2nuly90la2bcz.jpg',
+        image: 'https://res.cloudinary.com/do3fiil0d/image/upload/v1701536784/smartCanteenLogo_tbtynk.jpg',
         order_id: order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
         prefill: {
           name: "Takeshwar",
