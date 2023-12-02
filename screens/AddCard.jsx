@@ -107,15 +107,15 @@ export default function AddCard() {
         image: 'https://res.cloudinary.com/do3fiil0d/image/upload/v1700605328/foodimages/rlqhj8e2nuly90la2bcz.jpg',
         order_id: order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
         prefill: {
-          name: "Gaurav Kumar",
-          email: "gaurav.kumar@example.com",
+          name: "Takeshwar",
+          email: "Takeshwar124@gmail.com",
           contact: "9691382464"
         },
         notes: {
           "address": "Razorpay Corporate Office"
         },
         theme: {
-          "color": "black"
+          "color": "orange"
         }
       };
       RazorpayCheckout.open(options).then(async (data) => {
@@ -134,6 +134,7 @@ export default function AddCard() {
         // alert(`Success: ${data.razorpay_payment_id}`);
       }).catch((error) => {
         // handle failure
+        setSuccessModal(false);
         alert(`Error: ${error.code} | ${error.description}`);
       });
     }

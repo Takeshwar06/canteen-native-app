@@ -2,6 +2,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React, { useState,useCallback, useEffect } from 'react';
 import { View, ScrollView, TouchableOpacity, Text, Image, TextInput, } from 'react-native';
 import { getCoin } from '../utils/APIRoutes';
+import Icon from 'react-native-vector-icons/Ionicons'
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

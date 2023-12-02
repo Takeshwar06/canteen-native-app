@@ -40,7 +40,7 @@ export default function DefaultHome() {
       <View style={{backgroundColor:"#ede7e6",width:"100%",height:26,borderRadius:5,marginTop:13}}></View>
 
       {/* boxfood */}
-      <View style={{marginVertical:10,flexDirection:"row"}}>
+      <View style={{marginVertical:10,flexDirection:"row",flexWrap:"wrap"}}>
     <View style={{width:"50%",display:"flex",flexWrap:"wrap",padding:5}}>
         <View style={{width:"100%",height:130,borderRadius:15,backgroundColor:"#ede7e6"}}></View>
         <View style={{width:"100%",height:16,marginTop:5,backgroundColor:"#ede7e6"}}></View>
