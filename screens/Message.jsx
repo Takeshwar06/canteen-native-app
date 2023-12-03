@@ -28,6 +28,8 @@ export default function Message() {
   }, [logOutModal, logInModal])
 
   useFocusEffect(useCallback(() => {
+    console.log("first")
+    socket.current = io(host)
     fetchUserData();
     initailizeSocket();
     sendOrderToSocket();
@@ -38,7 +40,6 @@ export default function Message() {
     setUserId(userid);
     const isemployee = await AsyncStorage.getItem("employee")
     setEmployee(isemployee);
-    socket.current = io(host)
     socket.current.emit("add-user", userid)
     if (isemployee) {
       const uniqueEmployee = await AsyncStorage.getItem("uniqueEmployeeId")
@@ -85,44 +86,57 @@ export default function Message() {
   }
   // when rejected order by employee
   useEffect(() => {
-    if (socket.current) {
+    console.log("second")
       socket.current.on("rejected-order", async(data) => {
         console.log("rejected-orderr before check user id")
         const userid = await AsyncStorage.getItem("UserId")
         if (userid == data.auth[0]) {
           console.log("rejected-orderr after check user id")
-          const tempUserOrder = [...userOrder]
-          tempUserOrder.forEach((element, index) => {
-            if (element.uniqueOrderId == data.uniqueOrderId) {
-              tempUserOrder[index].rejected = true;
-              tempUserOrder[index].QRvalid = false;
-              setUserOrder(tempUserOrder);
-            }
+          setUserOrder((preOrder)=>{
+            return preOrder.map((element)=>{
+              if(element.uniqueOrderId==data.uniqueOrderId){
+                return {...element,rejected:true,QRvalid:false}
+              }
+              return element;
+            })
           })
+          // const tempUserOrder = [...userOrder]
+          // tempUserOrder.forEach((element, index) => {
+          //   if (element.uniqueOrderId == data.uniqueOrderId) {
+          //     tempUserOrder[index].rejected = true;
+          //     tempUserOrder[index].QRvalid = false;
+          //     setUserOrder(tempUserOrder);
+          //   }
+          // })
         }
       })
-    }
-  }, [userOrder,rejectOrder,employeeOrder])
+  }, [])
 
   // after completed order
   useEffect(() => {
-    if (socket.current) {
       socket.current.on("completed-order", async(data) => {
         console.log("completed-order before check user id");
         const userid = await AsyncStorage.getItem("UserId")
         if (userid == data.auth[0]) {
           console.log("completed-order after check user id");
-          const tempUserOrder = [...userOrder]
-          userOrder.forEach((element, index) => {
-            if (element.uniqueOrderId == data.uniqueOrderId) {
-              tempUserOrder[index].placed = true;
-              setUserOrder(tempUserOrder);
-            }
+          setUserOrder((preOrder)=>{
+            return preOrder.map((element)=>{
+              if(element.uniqueOrderId==data.uniqueOrderId){
+                return {...element,placed:true}
+              }
+              return element;
+            })
           })
+          // const tempUserOrder = [...userOrder]
+          // userOrder.forEach((element, index) => {
+          //   if (element.uniqueOrderId == data.uniqueOrderId) {
+          //     tempUserOrder[index].placed = true;
+          //     setUserOrder(tempUserOrder);
+          //   }
+          // })
         }
       })
-    }
-  }, [userOrder,upDateOrder,employeeOrder])
+  }, [])
 
 
   // now this part for employee *****************||***************
@@ -150,6 +164,7 @@ export default function Message() {
 
     const presentUser = await axios.post(getCoin, { userId: order.auth[0] })
     if (presentUser.data.length > 0) {
+      console.log("presentUser for coin")
       // updateCoin
       const response = await axios.post(updateCoin, {
         userId: presentUser.data[0].userId,
@@ -180,22 +195,35 @@ export default function Message() {
 
   // after taking order by another
   useEffect(() => {
-    if (socket.current) {
+    // if (socket.current) {
       socket.current.on("took-order", async({ order, employeeId, index }) => {
+        console.log("took-order called")
         const isEmp =await AsyncStorage.getItem("employee");
         if (isEmp) {
-          let data = [...employeeOrder];
-          const indexOfFood = data.findIndex(obj => obj.uniqueOrderId == order.uniqueOrderId);
-          if (indexOfFood !== -1) {
-            order.take.notTaken = false;
-            order.take.takenByMe = employeeId;
-            data[indexOfFood] = order
-            setEmployeeOrder(data);
-          }
+          setEmployeeOrder((preOrder)=>{
+            return preOrder.map((element)=>{
+             if(element.uniqueOrderId==order.uniqueOrderId){
+              return {...element,
+                take: {
+                    notTaken: false,
+                    takenByMe: employeeId,
+                },}
+             }
+             return element;
+            })
+          })
+          // let data = [...employeeOrder];
+          // const indexOfFood = data.findIndex(obj => obj.uniqueOrderId == order.uniqueOrderId);
+          // if (indexOfFood !== -1) {
+          //   order.take.notTaken = false;
+          //   order.take.takenByMe = employeeId;
+          //   data[indexOfFood] = order
+          //   setEmployeeOrder(data);
+          // }
         }
       })
-    }
-  }, [takeOrder])
+    // }
+  }, [])
 
   // when receving order from user
   useEffect(() => {
