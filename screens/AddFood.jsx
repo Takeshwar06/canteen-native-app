@@ -61,7 +61,7 @@ export default function AddFood() {
         body: formData
       }).then((res) => res.json())
         .then((data) => {
-          setFoodImg(data.url)
+          setFoodImg(`https${data.url.substring(4)}`)
           setIsLoading(false);
           console.log("dataurl", data.url);
           // setImgUploaded(true);
