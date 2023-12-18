@@ -1,7 +1,7 @@
 import { View, SafeAreaView, Text, Pressable, TextInput, TouchableOpacity, Image, ScrollView } from 'react-native'
 import IoIcon from "react-native-vector-icons/Ionicons"
 import React, { useCallback, useContext, useEffect, useState } from 'react'
-import { useFocusEffect, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { getAllFoodsRoute, updateAvailableRoute } from '../utils/APIRoutes';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -13,6 +13,8 @@ export default function UpdateFood() {
   const [searchFood, setSearchFood] = useState([])
   const [foods, setFoods] = useState([])
   const {setLogOutModal,logInModal,logOutModal,setLogInModal}=useContext(foodContext);
+  const {setReviewPageModal}=useContext(foodContext);
+  const navigation=useNavigation();
   // to use showAllFoods();
     const fetchempid=async()=>{
       const localemp=await AsyncStorage.getItem("employee");
@@ -86,6 +88,10 @@ export default function UpdateFood() {
     const json = await response.json();
     setFoods(json);
   }
+  async function setFoodToLocal(foodid){
+    await AsyncStorage.setItem("food_id",foodid);
+    setReviewPageModal(true)
+  }
   return (
     <SafeAreaView
       style={{
@@ -131,7 +137,9 @@ export default function UpdateFood() {
           searchTerm.length < 1 && foods.map((food,index) => {
             return (
               <View key={index} style={{ height: 150, paddingBottom: 10, margin: 10, flexDirection: "row", borderWidth: 1, borderBlockColor: "black", borderTopWidth: 0, borderLeftWidth: 0, borderRightWidth: 0 }}>
-                <Image style={{ height: 130, width: "40%", resizeMode: "contain", borderRadius: 5 }} source={{ uri:food.foodimg.length>0?food.foodimg: "https://www.verywellhealth.com/thmb/f1Ilvp8yoFZEKP_B_YBK8HO1irE=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/gastritis-diet-what-to-eat-for-better-management-4767967-primary-recirc-fc776855e98b43b9832a6fd313097d4f.jpg" }} />
+                <Pressable onPress={()=>setFoodToLocal(food._id)} style={{width:"40%"}}>
+                <Image style={{ height: 130, width: "100%", resizeMode: "contain", borderRadius: 5 }} source={{ uri:food.foodimg.length>0?food.foodimg: "https://www.verywellhealth.com/thmb/f1Ilvp8yoFZEKP_B_YBK8HO1irE=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/gastritis-diet-what-to-eat-for-better-management-4767967-primary-recirc-fc776855e98b43b9832a6fd313097d4f.jpg" }} />
+                </Pressable>
                 <View style={{ height: 130, width: "60%", paddingHorizontal: 15 }}>
                   <View style={{ flexDirection: "row",justifyContent:"space-between" }}>
                     <View>
@@ -139,8 +147,8 @@ export default function UpdateFood() {
                       <Text style={{ fontSize: 18, fontWeight: "500", marginTop: 5 }}>Price : ₹{food.foodprice}</Text>
                     </View>
                     <View style={{ marginRight:5 }}>
-                      {food.foodAvailable&&<IoIcon name="checkmark-circle" color={"green"} size={30}></IoIcon>}
-                     {!food.foodAvailable&&<IoIcon name="close-circle" color={"red"} size={30}></IoIcon>}
+                      {food.foodAvailable&&<IoIcon name="checkmark-circle-outline" color={"green"} size={30}></IoIcon>}
+                     {!food.foodAvailable&&<IoIcon name="close-circle-outline" color={"red"} size={30}></IoIcon>}
                     </View>
                   </View>
                   <View style={{ flexDirection: "row", alignItems: "center", marginTop: 30 }}>

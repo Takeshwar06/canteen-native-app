@@ -69,7 +69,8 @@ export default function Home() {
   }
   // add to card
   const addToCard = async (food) => {
-    showAlert(`${food.foodname} Added to Card`);
+    console.log("food._id",food._id)
+    showAlert(`${food.foodname} Add to Card`);
     const cardFoods = await AsyncStorage.getItem("cardFoods");
     const UserId = await AsyncStorage.getItem("UserId");
 
@@ -82,7 +83,7 @@ export default function Home() {
         foodimg: food.foodimg,
         foodname: food.foodname,
         foodprice: food.foodprice,
-        _id: food._id
+        food_id: food._id
       }]
       try {
         const result = await AsyncStorage.setItem("cardFoods", JSON.stringify(initialCardFoods));
@@ -91,7 +92,7 @@ export default function Home() {
       }
     } else {
       const cardFoods = JSON.parse(await AsyncStorage.getItem("cardFoods"));
-      const indexOfFood = cardFoods.findIndex(obj => obj._id == food._id);
+      const indexOfFood = cardFoods.findIndex(obj => obj.food_id == food._id);
       console.log(indexOfFood);
       if (indexOfFood !== -1) {
         cardFoods[indexOfFood].foodQuantity = cardFoods[indexOfFood].foodQuantity + 1;
@@ -104,7 +105,7 @@ export default function Home() {
           foodimg: food.foodimg,
           foodname: food.foodname,
           foodprice: food.foodprice,
-          _id: food._id
+          food_id: food._id
         }
         cardFoods.push(singleFood);
       }

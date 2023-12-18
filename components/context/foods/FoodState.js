@@ -17,11 +17,13 @@ export default function FoodState(props) {
   // const navigate=useNavigate();
   const [logOutModal, setLogOutModal] = useState(false);
   const [logInModal, setLogInModal] = useState(false);
+  const [reviewPageModal,setReviewPageModal]=useState(false);
  
   return (
        <foodContext.Provider value={{
         logOutModal,setLogOutModal,
-        logInModal,setLogInModal
+        logInModal,setLogInModal,
+        reviewPageModal,setReviewPageModal,
        }}>
            {props.children}
        </foodContext.Provider>

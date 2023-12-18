@@ -3,19 +3,20 @@ import React, { useCallback, useContext, useEffect, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import RazorpayCheckout from 'react-native-razorpay';
-import { getCoin, updateCoin, addorder, getkey, ordergenerate, paymentVarificationForApp } from '../utils/APIRoutes';
+import { getCoin,  addorder, getkey, ordergenerate, paymentVarificationForApp, oneCoinToDev, coinMinus, createCoin } from '../utils/APIRoutes';
 import axios from 'axios';
 import IoIcon from 'react-native-vector-icons/Ionicons'
 import foodContext from '../components/context/foods/foodContext';
-
+import auth from '@react-native-firebase/auth';
 export default function AddCard() {
   const [foods, setFoods] = useState([]);
   const [total, setTotal] = useState(0);
   const [employee, setEmployee] = useState(null)
   const [successModal, setSuccessModal] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const { setLogOutModal, setLogInModal } = useContext(foodContext);
+  const { setLogOutModal, setReviewPageModal,setLogInModal } = useContext(foodContext);
   const [isLoading, setIsLoading] = useState(true);
+  const [authLoaing,setAuthLoading]=useState(false);
   const navigation = useNavigation();
 
   // fetching card foods from AsyncStorage
@@ -32,6 +33,7 @@ export default function AddCard() {
     }
   }
   useFocusEffect(useCallback(() => {
+    console.log(auth().currentUser);
     setIsLoading(true);
     setSuccessModal(false);
     setModalVisible(false);
@@ -50,10 +52,23 @@ export default function AddCard() {
 
   // open modal to select payment using coin or another payment method
   const selectPaymentModal = async () => {
-    let a = 9098754023;
-    await AsyncStorage.setItem("referenceNum", JSON.stringify(a));
-    // navigation.navigate("Message");
-    setModalVisible(true)
+    setAuthLoading(true);
+     if(!auth().currentUser){
+      alert("please login first")
+      setAuthLoading(false);
+      navigation.navigate("Coin")
+     }else{
+      const response = await axios.post(createCoin, {
+        userName: auth().currentUser.displayName,
+        userEmail: auth().currentUser.email,
+        userImage: auth().currentUser.photoURL
+      })
+      if (response.data.userId) {
+        await AsyncStorage.setItem("UserId", response.data.userId)
+        setModalVisible(true)
+        setAuthLoading(false);
+      }
+     }
     // paymentProcess(50);
   }
 
@@ -67,9 +82,9 @@ export default function AddCard() {
     console.log(data);
     if (data.data.length > 0 && data.data[0].coin >= total) {
       console.log("same")
-      const coinUpdated = await axios.post(updateCoin, {
+      const coinUpdated = await axios.post(coinMinus, {
         userId: UserId,
-        updatedCoin: (data.data[0].coin) - (total)
+        updatedCoin:total
       })
       console.log(coinUpdated);
       if (coinUpdated.data.acknowledged === true) {
@@ -146,19 +161,22 @@ export default function AddCard() {
   // addOrder to data-base
   const addOrder = async (cardFoods, order_id) => {
     console.log("addorder called")
+    const userId=await AsyncStorage.getItem("UserId");
     cardFoods.forEach(async (food) => {
       const response = await axios.post(addorder, {
         uniqueOrderId: food.uniqueOrderId,
         foodname: food.foodname,
-        UserId: food.UserId,
+        UserId: userId,
         EmployeeId: food.EmployeeId,
         foodQuantity: food.foodQuantity,
         foodprice: food.foodprice,
         foodimg: food.foodimg,
+        food_id:food.food_id,
         placed: false,
         order_id: order_id
       })
     });
+    await axios.get(oneCoinToDev);
     setIsLoading(false);
     setTimeout(() => {
       setIsLoading(true);
@@ -207,6 +225,11 @@ export default function AddCard() {
   const toggleModal = () => {
     setModalVisible(!modalVisible);
   };
+
+  async function setFoodToLocal (foodid){
+    await AsyncStorage.setItem("food_id",foodid)
+    setReviewPageModal(true);
+  }
   return (
     <>
       <SafeAreaView
@@ -255,7 +278,9 @@ export default function AddCard() {
               foods.map((food, index) => {
                 return (
                   <View key={index} style={{ height: 150, paddingBottom: 10, margin: 10, flexDirection: "row", borderWidth: 1, borderBlockColor: "black", borderTopWidth: 0, borderLeftWidth: 0, borderRightWidth: 0 }}>
-                    <Image style={{ height: 130, width: "40%", resizeMode: "contain", borderRadius: 5 }} source={{ uri: food.foodimg.length > 0 ? food.foodimg : "https://www.verywellhealth.com/thmb/f1Ilvp8yoFZEKP_B_YBK8HO1irE=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/gastritis-diet-what-to-eat-for-better-management-4767967-primary-recirc-fc776855e98b43b9832a6fd313097d4f.jpg" }} />
+                    <Pressable onPress={()=>setFoodToLocal(food.food_id)} style={{width:"40%"}}>
+                    <Image style={{ height: 130, width: "100%", resizeMode: "contain", borderRadius: 5 }} source={{ uri: food.foodimg.length > 0 ? food.foodimg : "https://www.verywellhealth.com/thmb/f1Ilvp8yoFZEKP_B_YBK8HO1irE=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/gastritis-diet-what-to-eat-for-better-management-4767967-primary-recirc-fc776855e98b43b9832a6fd313097d4f.jpg" }} />
+                    </Pressable>
                     <View style={{ width: "60%", padding: 10, justifyContent: "space-between", marginLeft: 20 }}>
                       <Text style={{ fontSize: 20, fontWeight: "bold" }}>Name : {capitalizeEachWord(food.foodname)}</Text>
                       <Text style={{ fontSize: 20, fontWeight: "bold" }}>Price : ₹{food.foodprice}</Text>
@@ -288,8 +313,8 @@ export default function AddCard() {
               <Text style={{ marginHorizontal: 5, fontSize: 20, fontWeight: "500" }}>SubTotal</Text>
               <Text style={{ marginHorizontal: 5, fontSize: 20, fontWeight: "500" }}>₹{total}</Text>
             </View>
-            <TouchableOpacity disabled={total > 0 ? false : true} onPress={() => total > 0 && setModalVisible(true)} style={{ marginTop: 5, height: 40, backgroundColor: "orange", opacity: total > 0 ? null : 0.5, width: "100%", borderRadius: 8, justifyContent: "center", alignItems: "center" }}>
-              <Text style={{ fontSize: 18, fontWeight: "bold" }}>Buy Now</Text>
+            <TouchableOpacity disabled={total > 0 ? false : true} onPress={() => total > 0 && selectPaymentModal()} style={{ marginTop: 5, height: 40, backgroundColor: "orange", opacity: total > 0 ? null : 0.5, width: "100%", borderRadius: 8, justifyContent: "center", alignItems: "center" }}>
+              <Text style={{ fontSize: 18, fontWeight: "bold" }}>{authLoaing?<ActivityIndicator size={'small'}/>:"Buy Now"}</Text>
             </TouchableOpacity>
           </View>
         </View>

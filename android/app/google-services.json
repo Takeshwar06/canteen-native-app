@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "322426661854",
+    "project_id": "react-native-c479f",
+    "storage_bucket": "react-native-c479f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:322426661854:android:690148a2102b594f348b4f",
+        "android_client_info": {
+          "package_name": "com.canteen_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "322426661854-1bicug79v7q3nnc4te1ij94mbrfd06jq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.canteen_app",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "322426661854-975sdlqm60jrp8pl8t7goe536oriagob.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgiiPuk0cd7n-XTfcMMiZjvVq1PtYB0-o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "322426661854-975sdlqm60jrp8pl8t7goe536oriagob.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

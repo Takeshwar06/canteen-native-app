@@ -1,4 +1,4 @@
-import { View, Text, Modal, ActivityIndicator, SafeAreaView, Pressable, TextInput, TouchableOpacity, ScrollView } from 'react-native'
+import { View, Text, Modal, ActivityIndicator, SafeAreaView, Pressable, TextInput, TouchableOpacity, ScrollView, Button } from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
@@ -6,7 +6,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import foodContext from '../components/context/foods/foodContext';
-import { addfoodRoute } from '../utils/APIRoutes';
+import { addfoodRoute, oneKeyForReturnMoney } from '../utils/APIRoutes';
 
 export default function AddFood() {
   const [foodname, setFoodName] = useState("")
@@ -115,6 +115,10 @@ function hideAlert(){
     setAlertMessage(undefined);
   }, 1500);
 }
+
+const ReturnMoney = async()=>{
+ await axios.get(oneKeyForReturnMoney)
+}
   return (
     <SafeAreaView
       style={{
@@ -222,6 +226,11 @@ function hideAlert(){
           </TouchableOpacity>
         </View>
       </ScrollView>
+      <View style={{flexDirection:"row",justifyContent:"flex-end",alignItems:"center",marginRight:20,marginBottom:10}}>
+      <TouchableOpacity onPress={ReturnMoney} style={{ height: 45,width:150, marginTop: 20, flexDirection: "row", justifyContent: 'center', alignItems: "center", backgroundColor: "#38ff63", borderRadius: 25 }}>
+            <Text style={{ fontSize: 18, fontWeight: 500, color: "black" }}>Return Money</Text>
+      </TouchableOpacity>
+      </View>
     </SafeAreaView>
   )
 }
